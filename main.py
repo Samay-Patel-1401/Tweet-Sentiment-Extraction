@@ -63,102 +63,102 @@ for k in range(train.shape[0]):
 
 # ------------------------------------------------------------------------------- #
 
-# def build_model(): # Building the model
-#     ids = tf.keras.layers.Input((MAX_LEN,), dtype=tf.int32)
-#     att = tf.keras.layers.Input((MAX_LEN,), dtype=tf.int32)
-#     tok = tf.keras.layers.Input((MAX_LEN,), dtype=tf.int32)
+def build_model(): # Building the model
+    ids = tf.keras.layers.Input((MAX_LEN,), dtype=tf.int32)
+    att = tf.keras.layers.Input((MAX_LEN,), dtype=tf.int32)
+    tok = tf.keras.layers.Input((MAX_LEN,), dtype=tf.int32)
 
-#     bert_model = TFRobertaModel.from_pretrained('roberta-base')
-#     x = bert_model(ids,attention_mask=att,token_type_ids=tok)
+    bert_model = TFRobertaModel.from_pretrained('roberta-base')
+    x = bert_model(ids,attention_mask=att,token_type_ids=tok)
     
-#     x1 = tf.keras.layers.Dropout(0.1)(x[0]) 
-#     x1 = tf.keras.layers.Conv1D(1,1)(x1)
-#     x1 = tf.keras.layers.Flatten()(x1)
-#     x1 = tf.keras.layers.Activation('softmax')(x1)
+    x1 = tf.keras.layers.Dropout(0.1)(x[0]) 
+    x1 = tf.keras.layers.Conv1D(1,1)(x1)
+    x1 = tf.keras.layers.Flatten()(x1)
+    x1 = tf.keras.layers.Activation('softmax')(x1)
     
-#     x2 = tf.keras.layers.Dropout(0.1)(x[0]) 
-#     x2 = tf.keras.layers.Conv1D(1,1)(x2)
-#     x2 = tf.keras.layers.Flatten()(x2)
-#     x2 = tf.keras.layers.Activation('softmax')(x2)
+    x2 = tf.keras.layers.Dropout(0.1)(x[0]) 
+    x2 = tf.keras.layers.Conv1D(1,1)(x2)
+    x2 = tf.keras.layers.Flatten()(x2)
+    x2 = tf.keras.layers.Activation('softmax')(x2)
 
-#     model = tf.keras.models.Model(inputs=[ids, att, tok], outputs=[x1,x2])
-#     optimizer = tf.keras.optimizers.Adam(learning_rate=3e-5)
-#     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+    model = tf.keras.models.Model(inputs=[ids, att, tok], outputs=[x1,x2])
+    optimizer = tf.keras.optimizers.Adam(learning_rate=3e-5)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
-#     return model
+    return model
 
-# # ------------------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------ #
 
-# test = pd.read_csv('test.csv').fillna('')
+test = pd.read_csv('test.csv').fillna('')
 
-# ct = test.shape[0]
-# input_ids_t = np.ones((ct,MAX_LEN),dtype='int32')
-# attention_mask_t = np.zeros((ct,MAX_LEN),dtype='int32')
-# token_type_ids_t = np.zeros((ct,MAX_LEN),dtype='int32')
+ct = test.shape[0]
+input_ids_t = np.ones((ct,MAX_LEN),dtype='int32')
+attention_mask_t = np.zeros((ct,MAX_LEN),dtype='int32')
+token_type_ids_t = np.zeros((ct,MAX_LEN),dtype='int32')
 
-# for k in range(test.shape[0]):
+for k in range(test.shape[0]):
         
-#     # INPUT_IDS
-#     text1 = " "+" ".join(test.loc[k,'text'].split())
-#     enc = tokenizer.encode(text1)                
-#     s_tok = sentiment_id[test.loc[k,'sentiment']]
-#     input_ids_t[k,:len(enc.ids)+5] = [0] + enc.ids + [2,2] + [s_tok] + [2]
-#     attention_mask_t[k,:len(enc.ids)+5] = 1
+    # INPUT_IDS
+    text1 = " "+" ".join(test.loc[k,'text'].split())
+    enc = tokenizer.encode(text1)                
+    s_tok = sentiment_id[test.loc[k,'sentiment']]
+    input_ids_t[k,:len(enc.ids)+5] = [0] + enc.ids + [2,2] + [s_tok] + [2]
+    attention_mask_t[k,:len(enc.ids)+5] = 1
 
-# # ------------------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------ #
 
-# # Training the model
+# Training the model
 
-# jac = []; VER='v0'; DISPLAY=1 # USE display=1 FOR INTERACTIVE
-# oof_start = np.zeros((input_ids.shape[0],MAX_LEN))
-# oof_end = np.zeros((input_ids.shape[0],MAX_LEN))
-# preds_start = np.zeros((input_ids_t.shape[0],MAX_LEN))
-# preds_end = np.zeros((input_ids_t.shape[0],MAX_LEN))
+jac = []; VER='v0'; DISPLAY=1 # USE display=1 FOR INTERACTIVE
+oof_start = np.zeros((input_ids.shape[0],MAX_LEN))
+oof_end = np.zeros((input_ids.shape[0],MAX_LEN))
+preds_start = np.zeros((input_ids_t.shape[0],MAX_LEN))
+preds_end = np.zeros((input_ids_t.shape[0],MAX_LEN))
 
-# skf = StratifiedKFold(n_splits=5,shuffle=True,random_state=777)
-# for fold,(idxT,idxV) in enumerate(skf.split(input_ids,train.sentiment.values)):
+skf = StratifiedKFold(n_splits=5,shuffle=True,random_state=777)
+for fold,(idxT,idxV) in enumerate(skf.split(input_ids,train.sentiment.values)):
 
-#     print('#'*25)
-#     print('### FOLD %i'%(fold+1))
-#     print('#'*25)
+    print('#'*25)
+    print('### FOLD %i'%(fold+1))
+    print('#'*25)
     
-#     K.clear_session()
-#     model = build_model()
+    K.clear_session()
+    model = build_model()
         
-#     sv = tf.keras.callbacks.ModelCheckpoint(
-#         '%s-roberta-%i.h5'%(VER,fold), monitor='val_loss', verbose=1, save_best_only=True,
-#         save_weights_only=True, mode='auto', save_freq='epoch')
+    sv = tf.keras.callbacks.ModelCheckpoint(
+        '%s-roberta-%i.h5'%(VER,fold), monitor='val_loss', verbose=1, save_best_only=True,
+        save_weights_only=True, mode='auto', save_freq='epoch')
         
-#     model.fit([input_ids[idxT,], attention_mask[idxT,], token_type_ids[idxT,]], [start_tokens[idxT,], end_tokens[idxT,]], 
-#         epochs=3, batch_size=32, verbose=DISPLAY, callbacks=[sv],
-#         validation_data=([input_ids[idxV,],attention_mask[idxV,],token_type_ids[idxV,]], 
-#         [start_tokens[idxV,], end_tokens[idxV,]]))
+    model.fit([input_ids[idxT,], attention_mask[idxT,], token_type_ids[idxT,]], [start_tokens[idxT,], end_tokens[idxT,]], 
+        epochs=3, batch_size=32, verbose=DISPLAY, callbacks=[sv],
+        validation_data=([input_ids[idxV,],attention_mask[idxV,],token_type_ids[idxV,]], 
+        [start_tokens[idxV,], end_tokens[idxV,]]))
     
-#     print('Loading model...')
-#     model.load_weights('%s-roberta-%i.h5'%(VER,fold))
+    print('Loading model...')
+    model.load_weights('%s-roberta-%i.h5'%(VER,fold))
     
-#     print('Predicting OOF...')
-#     oof_start[idxV,],oof_end[idxV,] = model.predict([input_ids[idxV,],attention_mask[idxV,],token_type_ids[idxV,]],verbose=DISPLAY)
+    print('Predicting OOF...')
+    oof_start[idxV,],oof_end[idxV,] = model.predict([input_ids[idxV,],attention_mask[idxV,],token_type_ids[idxV,]],verbose=DISPLAY)
     
-#     print('Predicting Test...')
-#     preds = model.predict([input_ids_t,attention_mask_t,token_type_ids_t],verbose=DISPLAY)
-#     preds_start += preds[0]/skf.n_splits
-#     preds_end += preds[1]/skf.n_splits
+    print('Predicting Test...')
+    preds = model.predict([input_ids_t,attention_mask_t,token_type_ids_t],verbose=DISPLAY)
+    preds_start += preds[0]/skf.n_splits
+    preds_end += preds[1]/skf.n_splits
     
-#     # DISPLAY FOLD JACCARD
-#     all = []
-#     for k in idxV:
-#         a = np.argmax(oof_start[k,])
-#         b = np.argmax(oof_end[k,])
-#         if a>b: 
-#             st = train.loc[k,'text'] # IMPROVE CV/LB with better choice here
-#         else:
-#             text1 = " "+" ".join(train.loc[k,'text'].split())
-#             enc = tokenizer.encode(text1)
-#             st = tokenizer.decode(enc.ids[a-1:b])
-#         all.append(jaccard(st,train.loc[k,'selected_text']))
-#     jac.append(np.mean(all))
-#     print('>>>> FOLD %i Jaccard ='%(fold+1),np.mean(all))
-#     print()
+    # DISPLAY FOLD JACCARD
+    all = []
+    for k in idxV:
+        a = np.argmax(oof_start[k,])
+        b = np.argmax(oof_end[k,])
+        if a>b: 
+            st = train.loc[k,'text'] # IMPROVE CV/LB with better choice here
+        else:
+            text1 = " "+" ".join(train.loc[k,'text'].split())
+            enc = tokenizer.encode(text1)
+            st = tokenizer.decode(enc.ids[a-1:b])
+        all.append(jaccard(st,train.loc[k,'selected_text']))
+    jac.append(np.mean(all))
+    print('>>>> FOLD %i Jaccard ='%(fold+1),np.mean(all))
+    print()
 
-# print('>>>> OVERALL 5Fold CV Jaccard =',np.mean(jac))
+print('>>>> OVERALL 5Fold CV Jaccard =',np.mean(jac))
